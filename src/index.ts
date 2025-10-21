@@ -1,3 +1,4 @@
+import "@/db/connect";
 import express, { response } from "express";
 import authRouter from "./routes/auth";
 
@@ -13,7 +14,7 @@ app.use((req, res, next) => {
 }); */
 
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
 
