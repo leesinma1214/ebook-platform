@@ -1,5 +1,5 @@
 import "@/db/connect";
-import express, { response } from "express";
+import express from "express";
 import authRouter from "./routes/auth";
 import errorHandler from "./middlewares/errorHandler";
 
@@ -18,6 +18,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
+app.post("/test", (req, res) => {
+  console.log(req.body);
+  res.json({});
+});
 
 app.use(errorHandler);
 

@@ -5,7 +5,8 @@ import VerificationTokenModel from "@/models/verificationToken";
 import UserModel from "@/models/user";
 import mail from "@/utils/mail";
 import asyncHandler from "@/utils/asyncHandler";
-import { sendErrorResponse } from "@/utils/helper";
+import { sendErrorResponse, formatUserProfile } from "@/utils/helper";
+import jwt from "jsonwebtoken";
 
 export const generateAuthLink = asyncHandler(async (req, res) => {
   // Generate authentication link
@@ -47,7 +48,7 @@ export const generateAuthLink = asyncHandler(async (req, res) => {
   res.json({ message: "Please check your email for the verification link." });
 });
 
-export const verifyAuthToken: RequestHandler = async (req, res) => {
+export const verifyAuthToken = asyncHandler(async (req, res) => {
   const { token, userId } = req.query;
 
   if (typeof token !== "string" || typeof userId !== "string") {
@@ -79,6 +80,22 @@ export const verifyAuthToken: RequestHandler = async (req, res) => {
   await VerificationTokenModel.findByIdAndDelete(verificationToken._id);
 
   // TODO: authentication
+  const payload = { userId: user._id };
 
-  res.json({});
-};
+  const authToken = jwt.sign(payload, process.env.JWT_SECRET!, {
+    expiresIn: "15d",
+  });
+
+  res.cookie("authToken", authToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "development",
+    sameSite: "strict",
+    expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+  });
+
+  res.redirect(
+    `${process.env.AUTH_SUCCESS_URL}?profile=${JSON.stringify(
+      formatUserProfile(user)
+    )}`
+  );
+});
