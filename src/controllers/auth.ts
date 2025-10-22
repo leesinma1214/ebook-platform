@@ -4,8 +4,9 @@ import nodemailer from "nodemailer";
 import VerificationTokenModel from "@/models/verificationToken";
 import UserModel from "@/models/user";
 import mail from "@/utils/mail";
+import asyncHandler from "@/utils/asyncHandler";
 
-export const generateAuthLink: RequestHandler = async (req, res) => {
+export const generateAuthLink = asyncHandler(async (req, res) => {
   // Generate authentication link
   // And send that link to the users email address
 
@@ -35,7 +36,7 @@ export const generateAuthLink: RequestHandler = async (req, res) => {
     token: randomToken,
   });
 
-   const link = `${process.env.VERIFICATION_LINK}?token=${randomToken}&userId=${userId}`;
+  const link = `${process.env.VERIFICATION_LINK}?token=${randomToken}&userId=${userId}`;
 
   await mail.sendVerificationMail({
     link,
@@ -43,5 +44,4 @@ export const generateAuthLink: RequestHandler = async (req, res) => {
   });
 
   res.json({ message: "Please check your email for the verification link." });
-};
-
+});

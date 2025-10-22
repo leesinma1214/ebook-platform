@@ -1,6 +1,7 @@
 import "@/db/connect";
 import express, { response } from "express";
 import authRouter from "./routes/auth";
+import errorHandler from "./middlewares/errorHandler";
 
 const app = express();
 /* 
@@ -17,6 +18,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/auth", authRouter);
+
+app.use(errorHandler);
 
 const port = process.env.PORT || 8989;
 
