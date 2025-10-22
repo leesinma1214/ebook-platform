@@ -1,7 +1,17 @@
-import { Schema, model } from "mongoose";
-import {hashSync, compareSync, genSaltSync} from "bcrypt";
+import { Model, Schema, model } from "mongoose";
+import { hashSync, compareSync, genSaltSync } from "bcrypt";
 
-const verificationTokenSchema = new Schema({
+interface VerificationTokenDoc {
+  userId: string;
+  token: string;
+  expires: Date;
+}
+
+interface Methods {
+  compare(token: string): boolean;
+}
+
+const verificationTokenSchema = new Schema<VerificationTokenDoc, {}, Methods>({
   userId: {
     type: String,
     required: true,
@@ -13,7 +23,7 @@ const verificationTokenSchema = new Schema({
   expires: {
     type: Date,
     default: Date.now(),
-    expires: 60 * 60 * 24, // 24 hours
+    expires: 60 * 60 * 24,
   },
 });
 
@@ -22,16 +32,21 @@ verificationTokenSchema.pre("save", function (next) {
     const salt = genSaltSync(10);
     this.token = hashSync(this.token, salt);
   }
+
   next();
 });
 
-verificationTokenSchema.methods.compare = function (token: string) {
+verificationTokenSchema.methods.compare = function (token) {
   return compareSync(token, this.token);
-}
+};
 
 const VerificationTokenModel = model(
   "VerificationToken",
   verificationTokenSchema
 );
 
-export default VerificationTokenModel;
+export default VerificationTokenModel as Model<
+  VerificationTokenDoc,
+  {},
+  Methods
+>;
