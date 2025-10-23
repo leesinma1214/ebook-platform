@@ -1,12 +1,13 @@
 import { Request, Response, RequestHandler } from "express";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
 import VerificationTokenModel from "@/models/verificationToken";
 import UserModel from "@/models/user";
 import mail from "@/utils/mail";
 import asyncHandler from "@/utils/asyncHandler";
 import { sendErrorResponse, formatUserProfile } from "@/utils/helper";
 import jwt from "jsonwebtoken";
+import { uploadAvatarToAws } from "@/utils/fileUpload";
+import slugify from "slugify";
 
 export const generateAuthLink = asyncHandler(async (req, res) => {
   // Generate authentication link
@@ -110,7 +111,7 @@ export const logout: RequestHandler = (req, res) => {
   res.clearCookie("authToken").send();
 };
 
-export const updateProfile: RequestHandler = async (req, res) => {
+export const updateProfile = asyncHandler(async (req, res) => {
   const user = await UserModel.findByIdAndUpdate(
     req.user.id,
     {
@@ -130,6 +131,31 @@ export const updateProfile: RequestHandler = async (req, res) => {
     });
 
   // if there is any file upload them to cloud and update the database
+  const file = req.files.avatar;
+  if (!Array.isArray(file)) {
+    const extension = file.originalFilename?.split(".").pop()?.toLowerCase() || "png";
+    const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
+
+    if (!allowedExtensions.includes(extension)) {
+      return sendErrorResponse({
+        res,
+        message: "Invalid file type. Only PNG, JPG, and WEBP allowed.",
+        status: 400,
+      });
+    }
+
+    const uniqueFileName = `${user._id}-${slugify(req.body.name, {
+      lower: true,
+      replacement: "-",
+    })}.${extension}`;
+    user.avatar = await uploadAvatarToAws(
+      file,
+      uniqueFileName,
+      user.avatar?.id
+    );
+
+    await user.save();
+  }
 
   res.json({ profile: formatUserProfile(user) });
-};
+});
