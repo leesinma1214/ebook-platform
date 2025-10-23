@@ -1,5 +1,6 @@
 import "@/db/connect";
 import express from "express";
+import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth";
 import errorHandler from "./middlewares/errorHandler";
 
@@ -16,6 +17,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.post("/test", (req, res) => {
