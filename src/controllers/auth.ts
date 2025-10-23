@@ -6,7 +6,7 @@ import mail from "@/utils/mail";
 import asyncHandler from "@/utils/asyncHandler";
 import { sendErrorResponse, formatUserProfile } from "@/utils/helper";
 import jwt from "jsonwebtoken";
-import { uploadAvatarToAws } from "@/utils/fileUpload";
+import { updateAvatarToAws } from "@/utils/fileUpload";
 import slugify from "slugify";
 
 export const generateAuthLink = asyncHandler(async (req, res) => {
@@ -132,7 +132,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   // if there is any file upload them to cloud and update the database
   const file = req.files.avatar;
-  if (!Array.isArray(file)) {
+  if (file && !Array.isArray(file)) {
     const extension = file.originalFilename?.split(".").pop()?.toLowerCase() || "png";
     const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
 
@@ -148,7 +148,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       lower: true,
       replacement: "-",
     })}.${extension}`;
-    user.avatar = await uploadAvatarToAws(
+    user.avatar = await updateAvatarToAws(
       file,
       uniqueFileName,
       user.avatar?.id

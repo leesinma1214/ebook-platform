@@ -4,7 +4,7 @@ import { Request } from "express";
 import { File } from "formidable";
 import fs from "fs";
 
-export const uploadAvatarToAws = async (
+export const updateAvatarToAws = async (
   file: File,
   uniqueFileName: string,
   avatarId?: string
