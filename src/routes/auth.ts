@@ -1,18 +1,35 @@
 import { Router } from "express";
+import {
+  generateAuthLink,
+  logout,
+  sendProfileInfo,
+  updateProfile,
+  verifyAuthToken,
+} from "@/controllers/auth";
 import { isAuth } from "@/middlewares/auth";
-import { logout } from "@/controllers/auth";
-import { generateAuthLink, verifyAuthToken, sendProfileInfo } from "@/controllers/auth";
-import { EmailValidationSchema, validate } from "@/middlewares/validator";
+import { fileParser } from "@/middlewares/file";
+import {
+  emailValidationSchema,
+  newUserSchema,
+  validate,
+} from "@/middlewares/validator";
 
 const authRouter = Router();
 
 authRouter.post(
   "/generate-link",
-  validate(EmailValidationSchema),
+  validate(emailValidationSchema),
   generateAuthLink
 );
 authRouter.get("/verify", verifyAuthToken);
 authRouter.get("/profile", isAuth, sendProfileInfo);
 authRouter.post("/logout", isAuth, logout);
+authRouter.put(
+  "/profile",
+  isAuth,
+  fileParser,
+  validate(newUserSchema),
+  updateProfile
+);
 
 export default authRouter;

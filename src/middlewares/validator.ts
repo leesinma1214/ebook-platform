@@ -1,13 +1,23 @@
 import { RequestHandler } from "express";
 import { ZodRawShape, ZodObject, z } from "zod";
 
-export const EmailValidationSchema = {
+export const emailValidationSchema = {
   email: z
     .string({
       error: (issue) =>
         issue.input === undefined ? "Email is missing!" : "Invalid email type!",
     })
     .email("Invalid email!"),
+};
+
+export const newUserSchema = {
+  name: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined ? "Name is missing!" : "Invalid name!",
+    })
+    .min(3, "Name must be 3 characters long!")
+    .trim(),
 };
 
 export const validate = <T extends ZodRawShape>(obj: T): RequestHandler => {
