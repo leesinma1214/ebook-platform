@@ -107,3 +107,7 @@ export const sendProfileInfo: RequestHandler = (req, res) => {
     profile: req.user,
   });
 };
+
+export const logout: RequestHandler = (req, res) => {
+  res.clearCookie("authToken").send();
+};

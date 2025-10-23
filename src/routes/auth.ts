@@ -1,5 +1,6 @@
-import { isAuth } from "@/middlewares/auth";
 import { Router } from "express";
+import { isAuth } from "@/middlewares/auth";
+import { logout } from "@/controllers/auth";
 import { generateAuthLink, verifyAuthToken, sendProfileInfo } from "@/controllers/auth";
 import { EmailValidationSchema, validate } from "@/middlewares/validator";
 
@@ -12,5 +13,6 @@ authRouter.post(
 );
 authRouter.get("/verify", verifyAuthToken);
 authRouter.get("/profile", isAuth, sendProfileInfo);
+authRouter.post("/logout", isAuth, logout);
 
 export default authRouter;
