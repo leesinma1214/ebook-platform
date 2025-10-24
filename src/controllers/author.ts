@@ -1,3 +1,4 @@
+import { RequestHandler } from "express";
 import AuthorModel from "@/models/author";
 import UserModel from "@/models/user";
 import asyncHandler from "@/utils/asyncHandler";
@@ -35,4 +36,23 @@ export const registerAuthor = asyncHandler(async (req, res) => {
   });
 
   res.json({ message: "Thanks for registering as an author." });
+});
+
+export const getAuthorDetails = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+
+  const author = await AuthorModel.findOne({ slug });
+  if (!author)
+    return sendErrorResponse({
+      res,
+      message: "Author not found!",
+      status: 404,
+    });
+
+  res.json({
+    id: author._id,
+    name: author.name,
+    about: author.about,
+    socialLinks: author.socialLinks,
+  });
 });
