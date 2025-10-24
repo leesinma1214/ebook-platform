@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { ZodRawShape, ZodObject, z } from "zod";
+import { ZodRawShape, z } from "zod";
 
 export const emailValidationSchema = {
   email: z
@@ -20,7 +20,25 @@ export const newUserSchema = {
     .trim(),
 };
 
-export const newAuthorSchema = {};
+export const newAuthorSchema = {
+  name: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined ? "Name is missing!" : "Invalid name!",
+    })
+    .trim()
+    .min(3, "Invalid name"),
+  about: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined ? "About is missing!" : "Invalid about!",
+    })
+    .trim()
+    .min(100, "Please write at least 100 characters about yourself!"),
+  socialLinks: z
+    .array(z.url({ message: "Social links can only be list of valid URLs!" }))
+    .optional(),
+};
 
 export const validate = <T extends ZodRawShape>(obj: T): RequestHandler => {
   return (req, res, next) => {
