@@ -52,3 +52,11 @@ export const isAuth = asyncHandler(async (req, res, next) => {
 
   next();
 });
+
+export const isAuthor: RequestHandler = (req, res, next) => {
+  if (req.user.role === "author") {
+    next();
+  } else {
+    return sendErrorResponse({ message: "Invalid request!", res, status: 401 });
+  }
+};
