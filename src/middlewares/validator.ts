@@ -7,7 +7,7 @@ export const emailValidationSchema = z.object({
       error: (issue) =>
         issue.input === undefined ? "Email is missing!" : "Invalid email type!",
     })
-    .email("Invalid email!"),
+    .email({ message: "Invalid email!" }),
 });
 
 export const newUserSchema = z.object({
@@ -36,11 +36,17 @@ export const newAuthorSchema = z.object({
     .trim()
     .min(100, "Please write at least 100 characters about yourself!"),
   socialLinks: z
-    .array(z.url({ message: "Social links can only be list of valid URLs!" }))
+    .array(z.url({"message": "Social links can only be list of valid URLs!"}))
     .optional(),
 });
 
-export const newBookSchema = z.object({
+const commonBookSchema = {
+  uploadMethod: z.enum(["aws", "local"], {
+    error: (issue) =>
+    issue.input === undefined
+      ? "Upload method is missing!"
+      : "uploadMethod needs to be either aws or local",
+  }),
   title: z
     .string({
       error: (issue) =>
@@ -52,15 +58,13 @@ export const newBookSchema = z.object({
       error: (issue) =>
         issue.input === undefined
           ? "Description is missing!"
-          : "Invalid description!",
+          : "Invalid Description!",
     })
     .trim(),
   language: z
     .string({
       error: (issue) =>
-        issue.input === undefined
-          ? "Language is missing!"
-          : "Invalid language!",
+        issue.input === undefined ? "Language is missing!" : "Invalid language!",
     })
     .trim(),
   publishedAt: z.coerce.date({
@@ -101,9 +105,7 @@ export const newBookSchema = z.object({
         mrp: z
           .number({
             error: (issue) =>
-              issue.input === undefined
-                ? "MRP is missing!"
-                : "Invalid mrp price!",
+              issue.input === undefined ? "MRP is missing!" : "Invalid mrp price!",
           })
           .nonnegative("Invalid mrp!"),
         sale: z
@@ -121,49 +123,63 @@ export const newBookSchema = z.object({
       (price) => price.sale <= price.mrp,
       "Sale price should be less then mrp!"
     ),
-  fileInfo: z
+};
+
+const fileInfo = z
+  .string({
+    error: (issue) =>
+      issue.input === undefined ? "File info is missing!" : "Invalid file info!",
+  })
+  .transform((value, ctx) => {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      ctx.addIssue({ code: "custom", message: "Invalid File Info!" });
+      return z.NEVER;
+    }
+  })
+  .pipe(
+    z.object({
+      name: z
+        .string({
+          error: (issue) =>
+            issue.input === undefined
+              ? "fileInfo.name is missing!"
+              : "Invalid fileInfo.name!",
+        })
+        .trim(),
+      type: z
+        .string({
+          error: (issue) =>
+            issue.input === undefined
+              ? "fileInfo.type is missing!"
+              : "Invalid fileInfo.type!",
+        })
+        .trim(),
+      size: z
+        .number({
+          error: (issue) =>
+            issue.input === undefined
+              ? "fileInfo.size is missing!"
+              : "Invalid fileInfo.size!",
+        })
+        .nonnegative("Invalid fileInfo.size!"),
+    })
+  );
+
+export const newBookSchema = z.object({
+  ...commonBookSchema,
+  fileInfo,
+});
+
+export const updateBookSchema = z.object({
+  ...commonBookSchema,
+  slug: z
     .string({
-      error: (issue) =>
-        issue.input === undefined
-          ? "File info is missing!"
-          : "Invalid file info!",
+      message: "Invalid slug!",
     })
-    .transform((value, ctx) => {
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        ctx.addIssue({ code: "custom", message: "Invalid File Info!" });
-        return z.NEVER;
-      }
-    })
-    .pipe(
-      z.object({
-        name: z
-          .string({
-            error: (issue) =>
-              issue.input === undefined
-                ? "fileInfo.name is missing!"
-                : "Invalid fileInfo.name!",
-          })
-          .trim(),
-        type: z
-          .string({
-            error: (issue) =>
-              issue.input === undefined
-                ? "fileInfo.type is missing!"
-                : "Invalid fileInfo.type!",
-          })
-          .trim(),
-        size: z
-          .number({
-            error: (issue) =>
-              issue.input === undefined
-                ? "fileInfo.size is missing!"
-                : "Invalid fileInfo.size!",
-          })
-          .nonnegative("Invalid fileInfo.size!"),
-      })
-    ),
+    .trim(),
+  fileInfo: fileInfo.optional(),
 });
 
 export const validate = <T extends ZodRawShape>(

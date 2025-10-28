@@ -1,16 +1,23 @@
 import s3Client from "@/cloud/aws";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  BucketAccelerateStatus,
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { Request } from "express";
 import { File } from "formidable";
 import fs from "fs";
 import { generateS3ClientPublicUrl } from "./helper";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const updateAvatarToAws = async (
   file: File,
   uniqueFileName: string,
   avatarId?: string
 ) => {
-  const bucketName = "ebook-public-data-23f92d7";
+  const bucketName = process.env.AWS_PUBLIC_BUCKET;
   if (avatarId) {
     const deleteCommand = new DeleteObjectCommand({
       Bucket: bucketName,
@@ -28,7 +35,10 @@ export const updateAvatarToAws = async (
 
   return {
     id: uniqueFileName,
-    url: generateS3ClientPublicUrl("ebook-public-data-23f92d7", uniqueFileName),
+    url: generateS3ClientPublicUrl(
+      process.env.AWS_PUBLIC_BUCKET!,
+      uniqueFileName
+    ),
   };
 };
 
@@ -45,6 +55,29 @@ export const uploadBookToAws = async (
 
   return {
     id: uniqueFileName,
-    url: generateS3ClientPublicUrl("ebook-public-data-23f92d7", uniqueFileName),
+    url: generateS3ClientPublicUrl(
+      process.env.AWS_PUBLIC_BUCKET!,
+      uniqueFileName
+    ),
   };
+};
+
+interface FileInfo {
+  bucket: string;
+  uniqueKey: string;
+  contentType: string;
+}
+
+export const generateFileUploadUrl = async (
+  client: S3Client,
+  fileInfo: FileInfo
+) => {
+  const { bucket, uniqueKey, contentType } = fileInfo;
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: uniqueKey,
+    ContentType: contentType,
+  });
+
+  return await getSignedUrl(client, command);
 };
