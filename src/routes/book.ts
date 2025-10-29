@@ -1,7 +1,7 @@
-import { createNewBook } from "@/controllers/book";
+import { createNewBook, updateBook } from "@/controllers/book";
 import { isAuth, isAuthor } from "@/middlewares/auth";
 import { fileParser } from "@/middlewares/file";
-import { newBookSchema, validate } from "@/middlewares/validator";
+import { newBookSchema, updateBookSchema, validate } from "@/middlewares/validator";
 import { Router } from "express";
 
 const bookRouter = Router();
@@ -13,6 +13,15 @@ bookRouter.post(
   fileParser,
   validate(newBookSchema),
   createNewBook
+);
+
+bookRouter.patch(
+  "/",
+  isAuth,
+  isAuthor,
+  fileParser,
+  validate(updateBookSchema),
+  updateBook
 );
 
 export default bookRouter;
