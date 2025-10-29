@@ -11,6 +11,6 @@ export const addReview = asyncHandler(async (req, res) => {
   );
 
   res.json({
-    message: "Review added.",
+    message: "Review updated.",
   });
 });

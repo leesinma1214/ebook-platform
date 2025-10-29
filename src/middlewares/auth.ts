@@ -54,6 +54,23 @@ export const isAuth = asyncHandler(async (req, res, next) => {
   next();
 });
 
+export const isPurchasedByTheUser = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findOne({
+    _id: req.user.id,
+    books: req.body.bookId,
+  });
+
+  if (!user) {
+    return sendErrorResponse({
+      res,
+      message: "Sorry you are not allowed to add review!",
+      status: 403,
+    });
+  }
+
+  next();
+});
+
 export const isAuthor: RequestHandler = (req, res, next) => {
   if (req.user.role === "author") {
     next();
