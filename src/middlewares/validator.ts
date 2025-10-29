@@ -222,7 +222,16 @@ export const validate = <T extends ZodRawShape>(
       req.body = result.data;
       next();
     } else {
-      const errors = result.error.flatten().fieldErrors;
+      // Format all errors as an object
+      const errors: Record<string, string[]> = {};
+      result.error.issues.forEach((issue) => {
+        const path = issue.path.join('.') || 'general';
+        if (!errors[path]) {
+          errors[path] = [];
+        }
+        errors[path].push(issue.message);
+      });
+      
       return res.status(422).json({ errors });
     }
   };
