@@ -213,7 +213,7 @@ export const newReviewSchema = z.object({
 });
 
 export const historyValidationSchema = z.object({
-  book: z
+  bookId: z
     .string({
       error: (issue) =>
         issue.input === undefined ? "Book id is missing!" : "Invalid book id!",

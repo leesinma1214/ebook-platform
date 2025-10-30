@@ -2,17 +2,17 @@ import HistoryModel from "@/models/history";
 import asyncHandler from "@/utils/asyncHandler";
 
 export const updateBookHistory = asyncHandler(async (req, res) => {
-  const { book, highlights, lastLocation } = req.body;
+  const { bookId, highlights, lastLocation } = req.body;
 
   let history = await HistoryModel.findOne({
-    book,
+    book: bookId,
     reader: req.user.id,
   });
 
   if (!history) {
     history = new HistoryModel({
       reader: req.user.id,
-      book,
+      book: bookId,
       lastLocation,
       highlights,
     });
