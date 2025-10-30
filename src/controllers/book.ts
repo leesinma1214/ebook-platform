@@ -5,7 +5,7 @@ import {
   sendErrorResponse,
 } from "@/utils/helper";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { Types } from "mongoose";
+import { ObjectId, Types } from "mongoose";
 import slugify from "slugify";
 import fs from "fs";
 import s3Client from "@/cloud/aws";
@@ -16,6 +16,8 @@ import {
 import AuthorModel from "@/models/author";
 import path from "path";
 import asyncHandler from "@/utils/asyncHandler";
+import { RequestHandler } from "express";
+import UserModel from "@/models/user";
 
 export const createNewBook = asyncHandler(async (req, res) => {
   const { body, files, user } = req;
@@ -224,4 +226,44 @@ export const updateBook = asyncHandler(async (req, res) => {
   await book.save();
 
   res.send(fileUploadUrl);
+});
+
+interface PopulatedBooks {
+  cover?: {
+    url: string;
+    id: string;
+  };
+  _id: ObjectId;
+  author: {
+    _id: ObjectId;
+    name: string;
+    slug: string;
+  };
+  title: string;
+  slug: string;
+}
+
+export const getAllPurchasedBooks = asyncHandler(async (req, res) => {
+  const user = await UserModel.findById(req.user.id).populate<{
+    books: PopulatedBooks[];
+  }>({
+    path: "books",
+    select: "author title cover slug",
+    populate: { path: "author", select: "slug name" },
+  });
+
+  if (!user) return res.json({ books: [] });
+
+  res.json({
+    books: user.books.map((book) => ({
+      id: book._id,
+      title: book.title,
+      cover: book.cover?.url,
+      slug: book.slug,
+      author: {
+        name: book.author.name,
+        slug: book.author.slug,
+      },
+    })),
+  });
 });
