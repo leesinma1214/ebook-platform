@@ -212,6 +212,51 @@ export const newReviewSchema = z.object({
     }),
 });
 
+export const historyValidationSchema = z.object({
+  book: z
+    .string({
+      error: (issue) =>
+        issue.input === undefined ? "Book id is missing!" : "Invalid book id!",
+    })
+    .transform((arg, ctx) => {
+      if (!isValidObjectId(arg)) {
+        ctx.addIssue({ code: "custom", message: "Invalid book id!" });
+        return z.NEVER;
+      }
+
+      return arg;
+    }),
+  lastLocation: z
+    .string({
+      error: (issue) => "Invalid last location!",
+    })
+    .trim()
+    .optional(),
+  highlights: z
+    .array(
+      z.object({
+        selection: z
+          .string({
+            error: (issue) =>
+              issue.input === undefined
+                ? "Highlight selection is missing!"
+                : "Invalid Highlight selection!",
+          })
+          .trim(),
+        fill: z
+          .string({
+            error: (issue) =>
+              issue.input === undefined
+                ? "Highlight fill is missing!"
+                : "Invalid Highlight fill!",
+          })
+          .trim(),
+      })
+    )
+    .optional(),
+});
+
+
 export const validate = <T extends ZodRawShape>(
   schema: ZodObject<T>
 ): RequestHandler => {
