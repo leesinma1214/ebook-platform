@@ -17,6 +17,7 @@ import AuthorModel from "@/models/author";
 import path from "path";
 import asyncHandler from "@/utils/asyncHandler";
 import UserModel from "@/models/user";
+import HistoryModel, { Settings } from "@/models/history";
 
 export const createNewBook = asyncHandler(async (req, res) => {
   const { body, files, user } = req;
@@ -352,4 +353,36 @@ export const getBookByGenre = asyncHandler(async (req, res) => {
       };
     }),
   });
+});
+
+export const generateBookAccessUrl = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+
+  const book = await BookModel.findOne({ slug });
+  if (!book)
+    return sendErrorResponse({ res, message: "Book not found!", status: 404 });
+
+  const user = await UserModel.findOne({ _id: req.user.id, books: book._id });
+  if (!user)
+    return sendErrorResponse({ res, message: "User not found!", status: 404 });
+
+  const history = await HistoryModel.findOne({
+    reader: req.user.id,
+    book: book._id,
+  });
+
+  const settings: Settings = {
+    lastLocation: "",
+    highlights: [],
+  };
+
+  if (history) {
+    settings.highlights = history.highlights.map((h) => ({
+      fill: h.fill,
+      selection: h.selection,
+    }));
+    settings.lastLocation = history.lastLocation;
+  }
+
+  res.json({ settings });
 });
