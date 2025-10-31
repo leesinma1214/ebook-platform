@@ -4,7 +4,11 @@ import {
   generateS3ClientPublicUrl,
   sendErrorResponse,
 } from "@/utils/helper";
-import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { ObjectId, Types } from "mongoose";
 import slugify from "slugify";
 import fs from "fs";
@@ -18,6 +22,7 @@ import path from "path";
 import asyncHandler from "@/utils/asyncHandler";
 import UserModel from "@/models/user";
 import HistoryModel, { Settings } from "@/models/history";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const createNewBook = asyncHandler(async (req, res) => {
   const { body, files, user } = req;
@@ -384,5 +389,12 @@ export const generateBookAccessUrl = asyncHandler(async (req, res) => {
     settings.lastLocation = history.lastLocation;
   }
 
-  res.json({ settings });
+  // generate access url using aws
+  const bookGetCommand = new GetObjectCommand({
+    Bucket: process.env.AWS_PRIVATE_BUCKET,
+    Key: book.fileInfo.id,
+  });
+  const accessUrl = await getSignedUrl(s3Client, bookGetCommand);
+
+  res.json({ settings, url: accessUrl });
 });
