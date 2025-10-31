@@ -1,4 +1,4 @@
-import { createNewBook, getAllPurchasedBooks, updateBook } from "@/controllers/book";
+import { createNewBook, getAllPurchasedBooks, getBooksPublicDetails, updateBook } from "@/controllers/book";
 import { isAuth, isAuthor } from "@/middlewares/auth";
 import { fileParser } from "@/middlewares/file";
 import { newBookSchema, updateBookSchema, validate } from "@/middlewares/validator";
@@ -24,5 +24,6 @@ bookRouter.patch(
   updateBook
 );
 bookRouter.get("/list", isAuth, getAllPurchasedBooks);
+bookRouter.get("/details/:slug", getBooksPublicDetails);
 
 export default bookRouter;

@@ -16,7 +16,6 @@ import {
 import AuthorModel from "@/models/author";
 import path from "path";
 import asyncHandler from "@/utils/asyncHandler";
-import { RequestHandler } from "express";
 import UserModel from "@/models/user";
 
 export const createNewBook = asyncHandler(async (req, res) => {
@@ -265,5 +264,60 @@ export const getAllPurchasedBooks = asyncHandler(async (req, res) => {
         slug: book.author.slug,
       },
     })),
+  });
+});
+
+export const getBooksPublicDetails = asyncHandler(async (req, res) => {
+  const book = await BookModel.findOne({ slug: req.params.slug }).populate<{
+    author: PopulatedBooks["author"];
+  }>({
+    path: "author",
+    select: "name slug",
+  });
+
+  if (!book)
+    return sendErrorResponse({
+      status: 404,
+      message: "Book not found!",
+      res,
+    });
+
+  const {
+    _id,
+    title,
+    cover,
+    author,
+    slug,
+    description,
+    genre,
+    language,
+    publishedAt,
+    publicationName,
+    price: { mrp, sale },
+    fileInfo,
+  } = book;
+
+  res.json({
+    book: {
+      id: _id,
+      title,
+      genre,
+      language,
+      slug,
+      description,
+      publicationName,
+      fileInfo,
+      publishedAt: publishedAt.toISOString().split("T")[0],
+      cover: cover?.url,
+      price: {
+        mrp: (mrp / 100).toFixed(2), // $1 100C/100 = $1
+        sale: (sale / 100).toFixed(2), // 1.50
+      },
+      author: {
+        id: author._id,
+        name: author.name,
+        slug: author.slug,
+      },
+    },
   });
 });
