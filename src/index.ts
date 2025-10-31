@@ -10,6 +10,7 @@ import reviewRouter from "./routes/review";
 import ReviewModel from "./models/review";
 import { Types } from "mongoose";
 import historyRouter from "./routes/history";
+import cors from "cors";
 
 const app = express();
 /* 
@@ -22,6 +23,12 @@ app.use((req, res, next) => {
   //console.log(req.body);
 }); */
 
+app.use(cors({ 
+  origin: [process.env.APP_URL!], 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

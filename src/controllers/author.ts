@@ -38,6 +38,18 @@ export const registerAuthor = asyncHandler(async (req, res) => {
   res.json({ message: "Thanks for registering as an author." });
 });
 
+export const updateAuthor = asyncHandler(async (req, res) => {
+  const { body, user } = req;
+
+  await AuthorModel.findByIdAndUpdate(user.authorId, {
+    name: body.name,
+    about: body.about,
+    socialLinks: body.socialLinks,
+  });
+
+  res.json({ message: "Your details updated successfully." });
+});
+
 export const getAuthorDetails = asyncHandler(async (req, res) => {
   const { slug } = req.params;
 
