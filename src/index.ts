@@ -1,16 +1,17 @@
 import "@/db/connect";
+import asyncHandler from "./utils/asyncHandler";
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth";
 import errorHandler from "./middlewares/errorHandler";
-import asyncHandler from "./utils/asyncHandler";
 import authorRouter from "./routes/author";
 import bookRouter from "./routes/book";
 import reviewRouter from "./routes/review";
 import ReviewModel from "./models/review";
 import { Types } from "mongoose";
 import historyRouter from "./routes/history";
-import cors from "cors";
+import cartRouter from "./routes/cart";
 
 const app = express();
 /* 
@@ -38,6 +39,7 @@ app.use("/author", authorRouter);
 app.use("/book", bookRouter);
 app.use("/review", reviewRouter);
 app.use("/history", historyRouter);
+app.use("/cart", cartRouter);
 
 app.get("/test", asyncHandler(async (req, res) => {
   const [result] = await ReviewModel.aggregate<{ averageRating: number }>([
