@@ -1,3 +1,5 @@
-export const updateCart = () => {
-  // Logic to update the cart
-};
+import asyncHandler from "@/utils/asyncHandler";
+
+export const updateCart = asyncHandler(async (req, res) => {
+  // Implementation for updating the cart
+});
