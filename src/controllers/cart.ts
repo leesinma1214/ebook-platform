@@ -82,3 +82,9 @@ export const getCart = asyncHandler(async (req, res) => {
     },
   });
 });
+
+export const clearCart = asyncHandler(async (req, res) => {
+  await CartModel.findOneAndUpdate({ userId: req.user.id }, { items: [] });
+
+  res.json({ message: "Cart cleared successfully!" });
+});
