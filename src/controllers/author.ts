@@ -51,9 +51,9 @@ export const updateAuthor = asyncHandler(async (req, res) => {
 });
 
 export const getAuthorDetails = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
+  const { id } = req.params;
 
-  const author = await AuthorModel.findOne({ slug });
+  const author = await AuthorModel.findById(id);
   if (!author)
     return sendErrorResponse({
       res,
