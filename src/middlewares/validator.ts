@@ -313,14 +313,12 @@ export const cartItemsSchema = z.object({
 
           return arg;
         }),
-      quantity: z
-        .number({
+      quantity: z.number({
           error: (issue) =>
             issue.input === undefined
               ? "Quantity is missing!"
               : "Quantity must be number!",
         })
-        .nonnegative("Invalid quantity!"),
     })
   ),
 });
