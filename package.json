@@ -24,6 +24,7 @@
     "mongoose": "^8.19.2",
     "nodemailer": "^7.0.9",
     "slugify": "^1.6.6",
+    "stripe": "^19.2.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

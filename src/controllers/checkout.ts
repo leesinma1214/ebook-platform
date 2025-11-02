@@ -1,17 +1,22 @@
 import { BookDoc } from "@/models/book";
 import CartModel from "@/models/cart";
-import { sendErrorResponse } from "@/utils/helper";
+import { sanitizeUrl, sendErrorResponse } from "@/utils/helper";
 import asyncHandler from "@/utils/asyncHandler";
 import { isValidObjectId } from "mongoose";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-10-29.clover",
+});
 
 export const checkout = asyncHandler(async (req, res) => {
-    const { cartId } = req.body;
+  const { cartId } = req.body;
   if (!isValidObjectId(cartId)) {
     return sendErrorResponse({ res, message: "Invalid cart id!", status: 401 });
   }
 
   const cart = await CartModel.findById(cartId).populate<{
-    items: { product: BookDoc; quantity: number };
+    items: { product: BookDoc; quantity: number }[];
   }>({
     path: "items.product",
   });
@@ -21,5 +26,47 @@ export const checkout = asyncHandler(async (req, res) => {
   }
 
   // if the cart is valid and there are products inside the cart then send those information to stripe and generate the payment link.
+  const customer = await stripe.customers.create({
+    name: req.user.name,
+    email: req.user.email,
+    metadata: {
+      userId: req.user.id,
+      cartId,
+      type: "checkout",
+    },
+  });
+
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    success_url: process.env.PAYMENT_SUCCESS_URL,
+    cancel_url: process.env.PAYMENT_CANCEL_URL,
+    line_items: cart.items.map(({ product, quantity }) => {
+      const images = product.cover?.url
+        ? { images: [sanitizeUrl(product.cover.url)] }
+        : {};
+      return {
+        quantity,
+        price_data: {
+          currency: "usd",
+          unit_amount: product.price.sale,
+          product_data: {
+            name: product.title,
+            ...images,
+          },
+        },
+      };
+    }),
+    customer: customer.id,
+  });
+
+  if (session.url) {
+    res.json({ checkoutUrl: session.url });
+  } else {
+    sendErrorResponse({
+      res,
+      message: "Something went wrong, could not handle payment!",
+      status: 500,
+    });
+  }
 });
-  
