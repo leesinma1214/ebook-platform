@@ -32,7 +32,11 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use("/webhook", webhookRouter);
+app.use(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  webhookRouter
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

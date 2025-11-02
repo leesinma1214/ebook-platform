@@ -1,13 +1,9 @@
 import { BookDoc } from "@/models/book";
 import CartModel from "@/models/cart";
+import stripe from "@/stripe";
 import { sanitizeUrl, sendErrorResponse } from "@/utils/helper";
 import asyncHandler from "@/utils/asyncHandler";
 import { isValidObjectId } from "mongoose";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-10-29.clover",
-});
 
 export const checkout = asyncHandler(async (req, res) => {
   const { cartId } = req.body;
