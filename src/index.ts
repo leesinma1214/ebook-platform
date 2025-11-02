@@ -13,6 +13,7 @@ import { Types } from "mongoose";
 import historyRouter from "./routes/history";
 import cartRouter from "./routes/cart";
 import checkoutRouter from "./routes/checkout";
+import webhookRouter from "./routes/webhook";
 
 const app = express();
 /* 
@@ -31,6 +32,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+app.use("/webhook", webhookRouter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
