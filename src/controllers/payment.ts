@@ -34,7 +34,7 @@ import asyncHandler from "@/utils/asyncHandler";
       const customer = (await stripe.customers.retrieve(
         customerId
       )) as unknown as StripeCustomer;
-      const { orderId, type, userId } = customer.metadata;
+      const { orderId, userId } = customer.metadata;
 
       const order = await OrderModel.findByIdAndUpdate(orderId, {
         stripeCustomerId: customerId,
