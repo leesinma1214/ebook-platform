@@ -1,6 +1,9 @@
 import { BookDoc } from "@/models/book";
 import OrderModel from "@/models/order";
 import UserModel from "@/models/user";
+import stripe from "@/stripe";
+import { StripeCustomer } from "@/types/stripe";
+import { sendErrorResponse } from "@/utils/helper";
 import asyncHandler from "@/utils/asyncHandler";
 import { isValidObjectId } from "mongoose";
 
@@ -55,4 +58,65 @@ export const getOrderStatus = asyncHandler(async (req, res) => {
   if (user) status = true;
 
   res.json({ status });
+});
+
+export const getOrderSuccessStatus = asyncHandler(async (req, res) => {
+  const { sessionId } = req.body;
+
+  if (typeof sessionId !== "string")
+    return sendErrorResponse({
+      res,
+      message: "Invalid session id!",
+      status: 400,
+    });
+
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const customerId = session.customer;
+
+  let customer: StripeCustomer;
+
+  if (typeof customerId === "string") {
+    customer = (await stripe.customers.retrieve(
+      customerId
+    )) as unknown as StripeCustomer;
+
+    const { orderId } = customer.metadata;
+    const order = await OrderModel.findById(orderId).populate<{
+      orderItems: {
+        id: BookDoc;
+        price: number;
+        qty: number;
+        totalPrice: number;
+      }[];
+    }>("orderItems.id");
+
+    if (!order)
+      return sendErrorResponse({
+        message: "Order not found!",
+        status: 404,
+        res,
+      });
+
+    const data = order.orderItems.map(
+      ({ id: book, price, totalPrice, qty }) => {
+        return {
+          id: book._id,
+          title: book.title,
+          slug: book.slug,
+          cover: book.cover?.url,
+          price: (price / 100).toFixed(2),
+          totalPrice: (totalPrice / 100).toFixed(2),
+          qty,
+        };
+      }
+    );
+
+    return res.json({ orders: data });
+  }
+
+  sendErrorResponse({
+    message: "Something went wrong order not found!",
+    status: 500,
+    res,
+  });
 });
