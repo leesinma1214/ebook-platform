@@ -443,7 +443,7 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
   }
 
   const recommendedBooks = await BookModel.aggregate<AggregationResult>([
-    { $match: { genre: book.genre } },
+    { $match: { genre: book.genre, _id: { $ne: book._id } } },
     {
       $lookup: {
         localField: "_id",
