@@ -6,7 +6,6 @@ import {
   getBookByGenre,
   getRecommendedBooks,
   updateBook,
-
 } from "@/controllers/book";
 import { isAuth, isAuthor } from "@/middlewares/auth";
 import { fileParser } from "@/middlewares/file";
