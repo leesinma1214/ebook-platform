@@ -44,6 +44,7 @@ export const generateAuthLink = asyncHandler(async (req, res) => {
   await mail.sendVerificationMail({
     link,
     to: user.email,
+    name: user.name || user.email.split("@")[0], // Pass user name
   });
 
   res.json({ message: "Please check your email for the verification link." });
@@ -133,7 +134,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
   // if there is any file upload them to cloud and update the database
   const file = req.files.avatar;
   if (file && !Array.isArray(file)) {
-    const extension = file.originalFilename?.split(".").pop()?.toLowerCase() || "png";
+    const extension =
+      file.originalFilename?.split(".").pop()?.toLowerCase() || "png";
     const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
 
     if (!allowedExtensions.includes(extension)) {
