@@ -14,10 +14,7 @@ import { isValidObjectId, ObjectId, Types } from "mongoose";
 import slugify from "slugify";
 import fs from "fs";
 import s3Client from "@/cloud/aws";
-import {
-  generateFileUploadUrl,
-  uploadBookToAws,
-} from "@/utils/fileUpload";
+import { generateFileUploadUrl, uploadBookToAws } from "@/utils/fileUpload";
 import AuthorModel from "@/models/author";
 import path from "path";
 import asyncHandler from "@/utils/asyncHandler";
@@ -460,4 +457,11 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
   const result = recommendedBooks.map<RecommendedBooks>(formatBook);
 
   res.json(result);
+});
+
+export const deleteBook = asyncHandler(async (req, res) => {
+  const { bookId } = req.params;
+  const { user } = req;
+
+  const book = await BookModel.findOne({ _id: bookId, author: user.authorId });
 });
