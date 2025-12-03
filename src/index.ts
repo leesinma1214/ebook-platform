@@ -15,6 +15,7 @@ import cartRouter from "./routes/cart";
 import checkoutRouter from "./routes/checkout";
 import webhookRouter from "./routes/webhook";
 import orderRouter from "./routes/order";
+import morgan from "morgan";
 
 const app = express();
 /* 
@@ -26,7 +27,7 @@ app.use((req, res, next) => {
 
   //console.log(req.body);
 }); */
-
+app.use(morgan("dev"));
 app.use(
   cors({
     origin: [process.env.APP_URL!],
