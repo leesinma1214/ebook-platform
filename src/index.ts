@@ -27,11 +27,9 @@ app.use((req, res, next) => {
   //console.log(req.body);
 }); */
 
-const allowedOrigins = [process.env.APP_URL].filter(Boolean);
-
 app.use(
   cors({
-    origin: [process.env.APP_URL!].filter(Boolean), // Remove the function, use array
+    origin: [process.env.APP_URL!],
     credentials: true,
   })
 );
