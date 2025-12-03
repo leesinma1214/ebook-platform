@@ -472,12 +472,26 @@ export const deleteBook = asyncHandler(async (req, res) => {
     return res.json({ success: false });
   }
 
-  await BookModel.findByIdAndUpdate(book._id);
+  await BookModel.findByIdAndDelete(book._id);
   const author = await AuthorModel.findById(user.authorId);
   if (author) {
     author.books = author.books.filter((id) => id.toString() !== bookId);
     await author.save();
   }
+
+  if (book.cover?.id) {
+    const coverDeleteCommand = new DeleteObjectCommand({
+      Bucket: process.env.AWS_PUBLIC_BUCKET,
+      Key: book.cover.id,
+    });
+    await s3Client.send(coverDeleteCommand);
+  }
+
+  const bookFileDeleteCommand = new DeleteObjectCommand({
+    Bucket: process.env.AWS_PRIVATE_BUCKET,
+    Key: book.fileInfo.id,
+  });
+  await s3Client.send(bookFileDeleteCommand);
 
   res.json({ success: true });
 });
