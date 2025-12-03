@@ -151,7 +151,7 @@ export const updateBook = asyncHandler(async (req, res) => {
     if (
       newBookFile &&
       !Array.isArray(newBookFile) &&
-      newBookFile.mimetype === "application/epub+zip"
+      fileInfo?.type === "application/epub+zip"
     ) {
       // remove old book file (epub) from storage
       const uploadPath = path.join(__dirname, "../books");
