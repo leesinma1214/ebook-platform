@@ -27,17 +27,15 @@ app.use((req, res, next) => {
   //console.log(req.body);
 }); */
 
-app.use(cors({ 
-  origin: [process.env.APP_URL!], 
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+const allowedOrigins = [process.env.APP_URL].filter(Boolean);
+
 app.use(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  webhookRouter
+  cors({
+    origin: [process.env.APP_URL!].filter(Boolean), // Remove the function, use array
+    credentials: true,
+  })
 );
+app.use("/webhook", express.raw({ type: "application/json" }), webhookRouter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -51,23 +49,26 @@ app.use("/cart", cartRouter);
 app.use("/checkout", checkoutRouter);
 app.use("/order", orderRouter);
 
-app.get("/test", asyncHandler(async (req, res) => {
-  const [result] = await ReviewModel.aggregate<{ averageRating: number }>([
-    {
-      $match: {
-        book: new Types.ObjectId("6900df97092f80a9a720e398"),
+app.get(
+  "/test",
+  asyncHandler(async (req, res) => {
+    const [result] = await ReviewModel.aggregate<{ averageRating: number }>([
+      {
+        $match: {
+          book: new Types.ObjectId("6900df97092f80a9a720e398"),
+        },
       },
-    },
-    {
-      $group: {
-        _id: null,
-        averageRating: { $avg: "$rating" },
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+        },
       },
-    },
-  ]);
+    ]);
 
-  res.json({ review: result.averageRating.toFixed(1) });
-}));
+    res.json({ review: result.averageRating.toFixed(1) });
+  })
+);
 
 app.use(errorHandler);
 
