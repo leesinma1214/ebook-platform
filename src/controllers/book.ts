@@ -21,6 +21,7 @@ import asyncHandler from "@/utils/asyncHandler";
 import UserModel from "@/models/user";
 import HistoryModel, { Settings } from "@/models/history";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import OrderModel from "@/models/order";
 
 export const createNewBook = asyncHandler(async (req, res) => {
   const { body, files, user } = req;
@@ -464,4 +465,14 @@ export const deleteBook = asyncHandler(async (req, res) => {
   const { user } = req;
 
   const book = await BookModel.findOne({ _id: bookId, author: user.authorId });
+});
+
+export const updateCopySold = asyncHandler(async (req, res) => {
+  const books = await BookModel.find();
+  const p = books.map((book) =>
+    BookModel.findByIdAndUpdate(book._id, { status: "published" })
+  );
+  await Promise.all(p);
+
+  res.send();
 });
