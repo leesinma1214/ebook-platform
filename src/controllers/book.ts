@@ -36,6 +36,7 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publicationName,
     publishedAt,
     uploadMethod,
+    status,
   } = body;
 
   const { cover, book } = files;
@@ -51,6 +52,7 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publishedAt,
     slug: "",
     author: new Types.ObjectId(user.authorId),
+    status,
   });
 
   let fileUploadUrl = "";
@@ -121,6 +123,7 @@ export const updateBook = asyncHandler(async (req, res) => {
     publishedAt,
     uploadMethod,
     slug,
+    status,
   } = body;
 
   const { cover, book: newBookFile } = files;
@@ -145,6 +148,7 @@ export const updateBook = asyncHandler(async (req, res) => {
   book.genre = genre;
   book.publishedAt = publishedAt;
   book.price = price;
+  book.status = status;
 
   if (uploadMethod === "local") {
     if (

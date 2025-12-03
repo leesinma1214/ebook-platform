@@ -45,8 +45,14 @@ const commonBookSchema = {
   uploadMethod: z.enum(["aws", "local"], {
     error: (issue) =>
       issue.input === undefined
-        ? "Upload method is missing!"
+        ? "Please specify upload method!"
         : "uploadMethod needs to be either aws or local",
+  }),
+  status: z.enum(["published", "unpublished"], {
+    error: (issue) =>
+      issue.input === undefined
+        ? "Please specify book status!"
+        : "Please provide a valid book status!",
   }),
   title: z
     .string({
