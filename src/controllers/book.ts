@@ -1,5 +1,6 @@
 import BookModel, { BookDoc } from "@/models/book";
 import {
+  formatBook,
   formatFileSize,
   generateS3ClientPublicUrl,
   sendErrorResponse,
@@ -334,30 +335,9 @@ export const getBooksPublicDetails = asyncHandler(async (req, res) => {
 export const getBookByGenre = asyncHandler(async (req, res) => {
   const books = await BookModel.find({ genre: req.params.genre }).limit(5);
 
+  books.map(formatBook);
   res.json({
-    books: books.map((book) => {
-      const {
-        _id,
-        title,
-        cover,
-        averageRating,
-        slug,
-        genre,
-        price: { mrp, sale },
-      } = book;
-      return {
-        id: _id,
-        title,
-        genre,
-        slug,
-        cover: cover?.url,
-        rating: averageRating?.toFixed(1),
-        price: {
-          mrp: (mrp / 100).toFixed(2), // $1 100C/100 = $1
-          sale: (sale / 100).toFixed(2), // 1.50
-        },
-      };
-    }),
+    books: books.map(formatBook),
   });
 });
 
@@ -428,7 +408,7 @@ export interface AggregationResult {
     _id: ObjectId;
   };
   slug: string;
-  averageRatings?: number;
+  averageRating?: number;
 }
 
 export const getRecommendedBooks = asyncHandler(async (req, res) => {
@@ -455,11 +435,11 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
     },
     {
       $addFields: {
-        averageRatings: { $avg: "$reviews.rating" },
+        averageRating: { $avg: "$reviews.rating" },
       },
     },
     {
-      $sort: { averageRatings: -1 },
+      $sort: { averageRating: -1 },
     },
     {
       $limit: 5,
@@ -472,23 +452,12 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
         genre: 1,
         price: 1,
         cover: 1,
-        averageRatings: 1,
+        averageRating: 1,
       },
     },
   ]);
 
-  const result = recommendedBooks.map<RecommendedBooks>((book) => ({
-    id: book._id.toString(),
-    title: book.title,
-    slug: book.slug,
-    genre: book.genre,
-    price: {
-      mrp: (book.price.mrp / 100).toFixed(2),
-      sale: (book.price.sale / 100).toFixed(2),
-    },
-    cover: book.cover?.url,
-    rating: book.averageRatings?.toFixed(1),
-  }));
+  const result = recommendedBooks.map<RecommendedBooks>(formatBook);
 
   res.json(result);
 });
