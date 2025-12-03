@@ -3,7 +3,7 @@ import AuthorModel from "@/models/author";
 import { BookDoc } from "@/models/book";
 import UserModel from "@/models/user";
 import asyncHandler from "@/utils/asyncHandler";
-import { sendErrorResponse } from "@/utils/helper";
+import { formatUserProfile, sendErrorResponse } from "@/utils/helper";
 import slugify from "slugify";
 
 export const registerAuthor = asyncHandler(async (req, res) => {
@@ -31,12 +31,24 @@ export const registerAuthor = asyncHandler(async (req, res) => {
   newAuthor.slug = uniqueSlug;
   await newAuthor.save();
 
-  await UserModel.findByIdAndUpdate(user.id, {
-    role: "author",
-    authorId: newAuthor._id,
-  });
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    user.id,
+    {
+      role: "author",
+      authorId: newAuthor._id,
+    },
+    { new: true }
+  );
 
-  res.json({ message: "Thanks for registering as an author." });
+  let userResult;
+  if (updatedUser) {
+    userResult = formatUserProfile(updatedUser);
+  }
+
+  res.json({
+    message: "Thanks for registering as an author.",
+    user: userResult,
+  });
 });
 
 export const updateAuthor = asyncHandler(async (req, res) => {
@@ -83,5 +95,29 @@ export const getAuthorDetails = asyncHandler(async (req, res) => {
         rating: book.averageRating?.toFixed(1),
       };
     }),
+  });
+});
+
+export const getBooks = asyncHandler(async (req, res) => {
+  const { authorId } = req.params;
+
+  const author = await AuthorModel.findById(authorId).populate<{
+    books: BookDoc[];
+  }>("books");
+
+  if (!author)
+    return sendErrorResponse({
+      message: "Unauthorized request!",
+      res,
+      status: 403,
+    });
+
+  res.json({
+    books: author.books.map((book) => ({
+      id: book._id?.toString(),
+      title: book.title,
+      slug: book.slug,
+      status: "dummy",
+    })),
   });
 });
