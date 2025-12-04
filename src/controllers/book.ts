@@ -465,19 +465,20 @@ export const deleteBook = asyncHandler(async (req, res) => {
   const { bookId } = req.params;
   const { user } = req;
   const deleteMethodAddedDate = 1764820380020;
-  const now = Date.now();
 
   if (!isValidObjectId(bookId)) {
     return sendErrorResponse({ message: "Invalid book id!", res, status: 422 });
   }
 
-  if (deleteMethodAddedDate >= now) {
-    return res.json({ success: false });
-  }
-
   const book = await BookModel.findOne({ _id: bookId, author: user.authorId });
   if (!book) {
     return sendErrorResponse({ message: "Book not found!", res, status: 404 });
+  }
+
+  const bookCreationTime = book._id.getTimestamp().getTime();
+  // if (deleteMethodAddedDate >= bookCreationTime) {
+  if (bookCreationTime < deleteMethodAddedDate) {
+    return res.json({ success: false });
   }
 
   if (book.copySold >= 1) {
@@ -490,6 +491,6 @@ export const deleteBook = asyncHandler(async (req, res) => {
     author.books = author.books.filter((id) => id.toString() !== bookId);
     await author.save();
   }
-
-  res.json();
+  
+  res.json({ success: true });
 });
