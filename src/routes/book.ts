@@ -4,6 +4,7 @@ import {
   generateBookAccessUrl,
   getAllPurchasedBooks,
   getBooksPublicDetails,
+  getFeaturedBooks,
   getBookByGenre,
   getRecommendedBooks,
   updateBook,
@@ -41,6 +42,7 @@ bookRouter.get("/details/:slug", getBooksPublicDetails);
 bookRouter.get("/by-genre/:genre", getBookByGenre);
 bookRouter.get("/read/:slug", isAuth, generateBookAccessUrl);
 bookRouter.get("/recommended/:bookId", getRecommendedBooks);
+bookRouter.get("/featured", getFeaturedBooks);
 bookRouter.delete("/:bookId", isAuth, isAuthor, deleteBook);
 
 export default bookRouter;

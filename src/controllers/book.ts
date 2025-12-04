@@ -483,6 +483,44 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
   res.json(result);
 });
 
+export const getFeaturedBooks = asyncHandler(async (req, res) => {
+  const books = [
+    {
+      title: "Murder on the Orient Express",
+      slogan: "Khám phá bí ẩn trên chuyến tàu Orient Express!",
+      subtitle: "Một hành trình ly kỳ qua những âm mưu và lừa dối.",
+      cover:
+        "https://playhouseonthesquare.org/assets/2991/10_murder_on_the_orient_express_square.png",
+      slug: "murder-on-the-orient-express-668f9ee73d175a420fa4de9a",
+    },
+    {
+      title: "To Kill a Mockingbird",
+      slogan: "Khám phá lòng dũng cảm trong thị trấn nhỏ.",
+      subtitle: "Một câu chuyện bất hủ về công lý và lòng trắc ẩn.",
+      cover:
+        "https://www.haydnsymons.com/wp-content/uploads/2013/07/book-cover-illustration.jpg",
+      slug: "to-kill-a-mockingbird-668f9ee73d175a420fa4de9d",
+    },
+    {
+      title: "The Girl with the Dragon Tattoo",
+      slogan: "Khám phá bí mật cùng cô gái và hình xăm rồng.",
+      subtitle: "Một câu chuyện trinh thám ly kỳ về bí ẩn và báo thù.",
+      cover: "https://m.media-amazon.com/images/I/51SdIh45zAL.jpg",
+      slug: "the-girl-with-the-dragon-tattoo-668f9ee73d175a420fa4debb",
+    },
+    {
+      title: "The Hunger Games",
+      slogan: "Sống sót trong trò chơi, châm ngòi cuộc nổi dậy.",
+      subtitle: "Cuộc phiêu lưu hùng tráng về sự sống còn và kiên cường.",
+      cover:
+        "https://cdn11.bigcommerce.com/s-nfxi2m/images/stencil/500x659/products/663/1414/Hunger-Games-Book__38075.1692810297.jpg?c=2",
+      slug: "the-hunger-games-668f9ee73d175a420fa4debe",
+    },
+  ];
+
+  res.json({ featureBooks: books });
+});
+
 export const deleteBook = asyncHandler(async (req, res) => {
   const { bookId } = req.params;
   const { user } = req;
@@ -513,7 +551,7 @@ export const deleteBook = asyncHandler(async (req, res) => {
     author.books = author.books.filter((id) => id.toString() !== bookId);
     await author.save();
   }
-  
+
   const coverId = book.cover?.id;
   const bookFileId = book.fileInfo.id;
 
