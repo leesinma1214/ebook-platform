@@ -35,6 +35,7 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publicationName,
     publishedAt,
     uploadMethod,
+    status,
   } = body;
 
   const { cover, book } = files;
@@ -49,9 +50,9 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publicationName,
     publishedAt,
     slug: "",
-    status: "published", // only a placeholder, actual status management to be implemented later
-    copySold: 0, // only a placeholder, actual sales tracking to be implemented later
     author: new Types.ObjectId(user.authorId),
+    status,
+    copySold: 0,
   });
 
   let fileUploadUrl = "";
@@ -122,6 +123,7 @@ export const updateBook = asyncHandler(async (req, res) => {
     publishedAt,
     uploadMethod,
     slug,
+    status,
   } = body;
 
   const { cover, book: newBookFile } = files;
@@ -146,6 +148,7 @@ export const updateBook = asyncHandler(async (req, res) => {
   book.genre = genre;
   book.publishedAt = publishedAt;
   book.price = price;
+  book.status = status;
 
   if (uploadMethod === "local") {
     if (
@@ -303,6 +306,7 @@ export const getBooksPublicDetails = asyncHandler(async (req, res) => {
     price: { mrp, sale },
     fileInfo,
     averageRating,
+    status,
   } = book;
 
   res.json({
@@ -310,6 +314,7 @@ export const getBooksPublicDetails = asyncHandler(async (req, res) => {
       id: _id,
       title,
       genre,
+      status,
       language,
       slug,
       description,
@@ -510,6 +515,6 @@ export const deleteBook = asyncHandler(async (req, res) => {
     });
     await s3Client.send(deleteCommand);
   }
-  
+
   res.json({ success: true });
 });

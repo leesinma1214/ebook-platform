@@ -117,7 +117,7 @@ export const getBooks = asyncHandler(async (req, res) => {
       id: book._id?.toString(),
       title: book.title,
       slug: book.slug,
-      status: "dummy",
+      status: book.status,
     })),
   });
 });
