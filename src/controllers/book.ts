@@ -463,9 +463,32 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
 
 export const deleteBook = asyncHandler(async (req, res) => {
   const { bookId } = req.params;
+  const { user } = req;
+  const deleteMethodAddedDate = 1764820380020;
+  const now = Date.now();
 
   if (!isValidObjectId(bookId)) {
     return sendErrorResponse({ message: "Invalid book id!", res, status: 422 });
+  }
+
+  if (deleteMethodAddedDate >= now) {
+    return res.json({ success: false });
+  }
+
+  const book = await BookModel.findOne({ _id: bookId, author: user.authorId });
+  if (!book) {
+    return sendErrorResponse({ message: "Book not found!", res, status: 404 });
+  }
+
+  if (book.copySold >= 1) {
+    return res.json({ success: false });
+  }
+
+  await BookModel.findByIdAndDelete(book._id);
+  const author = await AuthorModel.findById(user.authorId);
+  if (author) {
+    author.books = author.books.filter((id) => id.toString() !== bookId);
+    await author.save();
   }
 
   res.json();
