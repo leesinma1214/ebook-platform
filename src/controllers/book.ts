@@ -234,6 +234,12 @@ export const updateBook = asyncHandler(async (req, res) => {
   }
 
   await book.save();
+  // trying to make the app backward compatible
+  if (!user.books?.includes(book._id.toString())) {
+    await UserModel.findByIdAndUpdate(user.id, {
+      $push: { books: book._id },
+    });
+  }
 
   res.send(fileUploadUrl);
 });
