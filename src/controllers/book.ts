@@ -191,11 +191,7 @@ export const updateBook = asyncHandler(async (req, res) => {
 
   let fileUploadUrl = "";
   if (uploadMethod === "aws") {
-    if (
-      newBookFile &&
-      !Array.isArray(newBookFile) &&
-      newBookFile.mimetype === "application/epub+zip"
-    ) {
+    if (fileInfo?.type === "application/epub+zip") {
       // remove the old book from cloud (bucket)
       const deleteCommand = new DeleteObjectCommand({
         Bucket: process.env.AWS_PRIVATE_BUCKET,
@@ -211,9 +207,11 @@ export const updateBook = asyncHandler(async (req, res) => {
       });
       fileUploadUrl = await generateFileUploadUrl(s3Client, {
         bucket: process.env.AWS_PRIVATE_BUCKET!,
-        contentType: fileInfo?.type || newBookFile.mimetype,
+        contentType: fileInfo?.type,
         uniqueKey: fileName,
       });
+
+      book.fileInfo = { id: fileName, size: formatFileSize(fileInfo.size) };
     }
 
     if (cover && !Array.isArray(cover) && cover.mimetype?.startsWith("image")) {
