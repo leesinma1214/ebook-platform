@@ -106,6 +106,10 @@ export const createNewBook = asyncHandler(async (req, res) => {
     },
   });
   await newBook.save();
+
+  await UserModel.findByIdAndUpdate(req.user.id, {
+    $push: { books: newBook._id },
+  });
   res.send(fileUploadUrl);
 });
 
