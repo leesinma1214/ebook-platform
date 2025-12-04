@@ -49,6 +49,8 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publicationName,
     publishedAt,
     slug: "",
+    status: "published", // only a placeholder, actual status management to be implemented later
+    copySold: 0, // only a placeholder, actual sales tracking to be implemented later
     author: new Types.ObjectId(user.authorId),
   });
 
@@ -457,4 +459,14 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
   const result = recommendedBooks.map<RecommendedBooks>(formatBook);
 
   res.json(result);
+});
+
+export const deleteBook = asyncHandler(async (req, res) => {
+  const { bookId } = req.params;
+
+  if (!isValidObjectId(bookId)) {
+    return sendErrorResponse({ message: "Invalid book id!", res, status: 422 });
+  }
+
+  res.json();
 });
