@@ -21,7 +21,6 @@ import asyncHandler from "@/utils/asyncHandler";
 import UserModel from "@/models/user";
 import HistoryModel, { Settings } from "@/models/history";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import OrderModel from "@/models/order";
 
 export const createNewBook = asyncHandler(async (req, res) => {
   const { body, files, user } = req;
@@ -36,7 +35,6 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publicationName,
     publishedAt,
     uploadMethod,
-    status,
   } = body;
 
   const { cover, book } = files;
@@ -52,7 +50,6 @@ export const createNewBook = asyncHandler(async (req, res) => {
     publishedAt,
     slug: "",
     author: new Types.ObjectId(user.authorId),
-    status,
   });
 
   let fileUploadUrl = "";
@@ -123,7 +120,6 @@ export const updateBook = asyncHandler(async (req, res) => {
     publishedAt,
     uploadMethod,
     slug,
-    status,
   } = body;
 
   const { cover, book: newBookFile } = files;
@@ -148,7 +144,6 @@ export const updateBook = asyncHandler(async (req, res) => {
   book.genre = genre;
   book.publishedAt = publishedAt;
   book.price = price;
-  book.status = status;
 
   if (uploadMethod === "local") {
     if (
@@ -462,40 +457,4 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
   const result = recommendedBooks.map<RecommendedBooks>(formatBook);
 
   res.json(result);
-});
-
-export const deleteBook = asyncHandler(async (req, res) => {
-  const { bookId } = req.params;
-  const { user } = req;
-
-  const book = await BookModel.findOne({ _id: bookId, author: user.authorId });
-  if (!book)
-    return sendErrorResponse({ message: "Book not found!", status: 404, res });
-  
-  if (book.copySold && book.copySold >= 1) {
-    return res.json({ success: false });
-  }
-
-  await BookModel.findByIdAndDelete(book._id);
-  const author = await AuthorModel.findById(user.authorId);
-  if (author) {
-    author.books = author.books.filter((id) => id.toString() !== bookId);
-    await author.save();
-  }
-
-  if (book.cover?.id) {
-    const coverDeleteCommand = new DeleteObjectCommand({
-      Bucket: process.env.AWS_PUBLIC_BUCKET,
-      Key: book.cover.id,
-    });
-    await s3Client.send(coverDeleteCommand);
-  }
-
-  const bookFileDeleteCommand = new DeleteObjectCommand({
-    Bucket: process.env.AWS_PRIVATE_BUCKET,
-    Key: book.fileInfo.id,
-  });
-  await s3Client.send(bookFileDeleteCommand);
-
-  res.json({ success: true });
 });
