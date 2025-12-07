@@ -91,7 +91,7 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
   const isDevModeOn = process.env.NODE_ENV === "development";
   res.cookie("authToken", authToken, {
     httpOnly: true,
-    secure: !isDevModeOn,
+    secure: true, // Always true in production
     sameSite: isDevModeOn ? "strict" : "none",
     expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
   });
@@ -114,7 +114,7 @@ export const logout: RequestHandler = (req, res) => {
   res
     .clearCookie("authToken", {
       httpOnly: true,
-      secure: !isDevModeOn,
+      secure: true, // Always true in production
       sameSite: isDevModeOn ? "strict" : "none",
       path: "/",
     })
