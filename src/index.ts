@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: [process.env.APP_URL!, process.env.APP_URL_2!],
+    origin: [process.env.APP_URL!],
     credentials: true,
   })
 );
