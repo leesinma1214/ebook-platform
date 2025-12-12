@@ -518,7 +518,7 @@ export const getFeaturedBooks = asyncHandler(async (req, res) => {
     },
   ];
 
-  res.json({ featureBooks: books });
+  res.json({ featuredBooks: books });
 });
 
 export const deleteBook = asyncHandler(async (req, res) => {
