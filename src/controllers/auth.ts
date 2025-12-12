@@ -8,6 +8,7 @@ import { sendErrorResponse, formatUserProfile } from "@/utils/helper";
 import jwt from "jsonwebtoken";
 import { updateAvatarToAws } from "@/utils/fileUpload";
 import slugify from "slugify";
+import AuthorModel from "@/models/author";
 
 export const generateAuthLink = asyncHandler(async (req, res) => {
   // Generate authentication link
@@ -95,7 +96,6 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
     expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
   });
 
-
   res.redirect(
     `${process.env.AUTH_SUCCESS_URL}?profile=${JSON.stringify(
       formatUserProfile(user)
@@ -108,7 +108,6 @@ export const sendProfileInfo: RequestHandler = (req, res) => {
     profile: req.user,
   });
 };
-
 
 export const logout: RequestHandler = (req, res) => {
   const isDevModeOn = process.env.NODE_ENV === "development";
@@ -140,6 +139,13 @@ export const updateProfile = asyncHandler(async (req, res) => {
       message: "Something went wrong user not found!",
       status: 500,
     });
+
+  // Update author name if user is an author
+  if (user.authorId) {
+    await AuthorModel.findByIdAndUpdate(user.authorId, {
+      name: req.body.name,
+    });
+  }
 
   // if there is any file upload them to cloud and update the database
   const file = req.files.avatar;

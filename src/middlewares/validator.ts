@@ -17,8 +17,8 @@ export const newUserSchema = z.object({
       error: (issue) =>
         issue.input === undefined ? "Name is missing!" : "Invalid name!",
     })
-    .min(3, "Name must be 3 characters long!")
-    .trim(),
+    .trim()
+    .min(3, "Tên phải có độ dài tối thiểu 3 ký tự"),
 });
 
 export const newAuthorSchema = z.object({
@@ -320,11 +320,11 @@ export const cartItemsSchema = z.object({
           return arg;
         }),
       quantity: z.number({
-          error: (issue) =>
-            issue.input === undefined
-              ? "Quantity is missing!"
-              : "Quantity must be number!",
-        })
+        error: (issue) =>
+          issue.input === undefined
+            ? "Quantity is missing!"
+            : "Quantity must be number!",
+      }),
     })
   ),
 });
