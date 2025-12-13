@@ -92,20 +92,13 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
     expiresIn: "15d",
   });
 
-  const isDevModeOn = process.env.NODE_ENV === "development";
-  res.cookie("authToken", authToken, {
-    httpOnly: true,
-    secure: !isDevModeOn,
-    sameSite: isDevModeOn ? "strict" : "none",
-    expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-  });
-
-  // Use client-side redirect instead of server 302 to preserve cross-site cookies
+  // Redirect with token in URL so frontend can exchange it for a cookie
   const redirectUrl = `${
     process.env.AUTH_SUCCESS_URL
-  }?profile=${encodeURIComponent(JSON.stringify(formatUserProfile(user)))}`;
+  }?token=${authToken}&profile=${encodeURIComponent(
+    JSON.stringify(formatUserProfile(user))
+  )}`;
 
-  // If request accepts HTML (browser direct navigation), send a page that redirects client-side
   if (req.headers.accept?.includes("text/html")) {
     return res.send(`
       <!DOCTYPE html>
@@ -126,12 +119,59 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
     `);
   }
 
-  // For API clients, return JSON with redirect URL
   res.json({
     message: "Xác minh thành công",
     redirectUrl,
+    token: authToken,
     profile: formatUserProfile(user),
   });
+});
+
+// Add new endpoint for frontend to exchange token for cookie
+export const exchangeToken = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  if (!token || typeof token !== "string") {
+    return sendErrorResponse({
+      status: 400,
+      message: "Token is required",
+      res,
+    });
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
+      userId: string;
+    };
+
+    const user = await UserModel.findById(payload.userId);
+    if (!user) {
+      return sendErrorResponse({
+        status: 404,
+        message: "User not found",
+        res,
+      });
+    }
+
+    const isDevModeOn = process.env.NODE_ENV === "development";
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: !isDevModeOn,
+      sameSite: isDevModeOn ? "strict" : "none",
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+    });
+
+    res.json({
+      message: "Token exchanged successfully",
+      profile: formatUserProfile(user),
+    });
+  } catch (error) {
+    return sendErrorResponse({
+      status: 401,
+      message: "Invalid or expired token",
+      res,
+    });
+  }
 });
 
 export const sendProfileInfo: RequestHandler = (req, res) => {

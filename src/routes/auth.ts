@@ -5,6 +5,7 @@ import {
   sendProfileInfo,
   updateProfile,
   verifyAuthToken,
+  exchangeToken, // Add this
 } from "@/controllers/auth";
 import { isAuth } from "@/middlewares/auth";
 import { fileParser } from "@/middlewares/file";
@@ -31,5 +32,6 @@ authRouter.put(
   validate(newUserSchema),
   updateProfile
 );
+authRouter.post("/exchange-token", exchangeToken); // Add this route
 
 export default authRouter;
