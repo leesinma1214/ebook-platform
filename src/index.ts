@@ -19,16 +19,8 @@ import searchRouter from "./routes/search";
 import morgan from "morgan";
 
 const app = express();
-app.set("trust proxy", 1);
-/* 
-app.use((req, res, next) => {
-  req.on("data", (chunk) => {
-    req.body = JSON.parse(chunk);
-    next();
-  });
+app.set("trust proxy", 1); // Ensure this is set for Render/Heroku to handle secure cookies correctly
 
-  //console.log(req.body);
-}); */
 app.use(morgan("dev"));
 
 const allowedOrigins =
@@ -44,7 +36,7 @@ app.use(
 app.use("/webhook", express.raw({ type: "application/json" }), webhookRouter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.AUTH_SECRET));
 
 app.use("/auth", authRouter);
 app.use("/author", authorRouter);
