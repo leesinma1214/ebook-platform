@@ -82,6 +82,10 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
 
   await VerificationTokenModel.findByIdAndDelete(verificationToken._id);
 
+  // Mark user as signed up during verification
+  user.signedUp = true;
+  await user.save();
+
   const payload = { userId: user._id };
 
   const authToken = jwt.sign(payload, process.env.JWT_SECRET!, {
@@ -96,11 +100,38 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
     expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
   });
 
-  res.redirect(
-    `${process.env.AUTH_SUCCESS_URL}?profile=${JSON.stringify(
-      formatUserProfile(user)
-    )}`
-  );
+  // Use client-side redirect instead of server 302 to preserve cross-site cookies
+  const redirectUrl = `${
+    process.env.AUTH_SUCCESS_URL
+  }?profile=${encodeURIComponent(JSON.stringify(formatUserProfile(user)))}`;
+
+  // If request accepts HTML (browser direct navigation), send a page that redirects client-side
+  if (req.headers.accept?.includes("text/html")) {
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Chuyển hướng...</title>
+        </head>
+        <body>
+          <script>
+            window.location.href = ${JSON.stringify(redirectUrl)};
+          </script>
+          <noscript>
+            <a href="${redirectUrl}">Click vào đây để tiếp tục</a>
+          </noscript>
+        </body>
+      </html>
+    `);
+  }
+
+  // For API clients, return JSON with redirect URL
+  res.json({
+    message: "Xác minh thành công",
+    redirectUrl,
+    profile: formatUserProfile(user),
+  });
 });
 
 export const sendProfileInfo: RequestHandler = (req, res) => {
