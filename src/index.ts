@@ -19,6 +19,7 @@ import searchRouter from "./routes/search";
 import morgan from "morgan";
 
 const app = express();
+app.set("trust proxy", 1);
 /* 
 app.use((req, res, next) => {
   req.on("data", (chunk) => {
@@ -29,9 +30,14 @@ app.use((req, res, next) => {
   //console.log(req.body);
 }); */
 app.use(morgan("dev"));
+
+const allowedOrigins =
+  process.env.APP_URL?.split(",").map((url) => url.trim().replace(/\/$/, "")) ||
+  [];
+
 app.use(
   cors({
-    origin: [process.env.APP_URL!],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
