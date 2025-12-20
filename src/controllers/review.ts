@@ -17,7 +17,7 @@ export const addReview = asyncHandler(async (req, res) => {
   const [result] = await ReviewModel.aggregate<{ averageRating: number }>([
     {
       $match: {
-        book: new Types.ObjectId(bookId),
+        book: bookId,
       },
     },
     {

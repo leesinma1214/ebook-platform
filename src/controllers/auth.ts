@@ -105,14 +105,14 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Chuyển hướng...</title>
+          <title>Redirecting...</title>
         </head>
         <body>
           <script>
             window.location.href = ${JSON.stringify(redirectUrl)};
           </script>
           <noscript>
-            <a href="${redirectUrl}">Click vào đây để tiếp tục</a>
+            <a href="${redirectUrl}">Click here to continue</a>
           </noscript>
         </body>
       </html>
@@ -120,7 +120,7 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
   }
 
   res.json({
-    message: "Xác minh thành công",
+    message: "Verification successful",
     redirectUrl,
     token: authToken,
     profile: formatUserProfile(user),

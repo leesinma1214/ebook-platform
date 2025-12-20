@@ -1,12 +1,9 @@
 import s3Client from "@/cloud/aws";
 import {
-  BucketAccelerateStatus,
   DeleteObjectCommand,
   PutObjectCommand,
-  S3,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { Request } from "express";
 import { File } from "formidable";
 import fs from "fs";
 import { generateS3ClientPublicUrl } from "./helper";

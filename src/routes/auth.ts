@@ -5,7 +5,7 @@ import {
   sendProfileInfo,
   updateProfile,
   verifyAuthToken,
-  exchangeToken, // Add this
+  exchangeToken,
 } from "@/controllers/auth";
 import { isAuth } from "@/middlewares/auth";
 import { fileParser } from "@/middlewares/file";
