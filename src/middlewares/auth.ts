@@ -31,6 +31,10 @@ export const isAuth = asyncHandler(async (req, res, next) => {
     }
   }
 
+  if (!authToken) {
+    authToken = req.query.token as string;
+  }
+
   // send error response if there is no token
   if (!authToken) {
     return sendErrorResponse({
