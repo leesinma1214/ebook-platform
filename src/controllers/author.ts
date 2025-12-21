@@ -5,6 +5,7 @@ import UserModel from "@/models/user";
 import asyncHandler from "@/utils/asyncHandler";
 import { formatUserProfile, sendErrorResponse } from "@/utils/helper";
 import slugify from "slugify";
+import jwt from "jsonwebtoken";
 
 export const registerAuthor = asyncHandler(async (req, res) => {
   const { body, user } = req;
@@ -121,3 +122,64 @@ export const getBooks = asyncHandler(async (req, res) => {
     })),
   });
 });
+
+export const exchangeToken = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  if (!token || typeof token !== "string") {
+    return sendErrorResponse({
+      status: 400,
+      message: "Token is required",
+      res,
+    });
+  }
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
+      userId: string;
+    };
+
+    const user = await UserModel.findById(payload.userId);
+    if (!user) {
+      return sendErrorResponse({
+        status: 404,
+        message: "User not found",
+        res,
+      });
+    }
+
+    const isDevModeOn = process.env.NODE_ENV === "development";
+
+    // Fixed cookie settings
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: true, // Always use secure in production, for dev use localhost over HTTP
+      sameSite: isDevModeOn ? "lax" : "none", // Changed from "strict" to "lax"
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      path: "/",
+    });
+
+    res.json({
+      message: "Token exchanged successfully",
+      profile: formatUserProfile(user),
+    });
+  } catch (error) {
+    return sendErrorResponse({
+      status: 401,
+      message: "Invalid or expired token",
+      res,
+    });
+  }
+});
+
+export const logout: RequestHandler = (req, res) => {
+  const isDevModeOn = process.env.NODE_ENV === "development";
+  res
+    .clearCookie("authToken", {
+      httpOnly: true,
+      secure: true, // Match the secure setting
+      sameSite: isDevModeOn ? "lax" : "none", // Match the sameSite setting
+      path: "/",
+    })
+    .send();
+};

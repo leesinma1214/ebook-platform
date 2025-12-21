@@ -18,7 +18,7 @@ export const newUserSchema = z.object({
         issue.input === undefined ? "Name is missing!" : "Invalid name!",
     })
     .trim()
-    .min(3, "Tên phải có độ dài tối thiểu 3 ký tự"),
+    .min(3, "Name must be at least 3 characters long"),
 });
 
 export const newAuthorSchema = z.object({
