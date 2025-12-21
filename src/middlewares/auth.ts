@@ -22,7 +22,14 @@ declare global {
 }
 
 export const isAuth = asyncHandler(async (req, res, next) => {
-  const authToken = req.cookies.authToken;
+  let authToken = req.cookies.authToken;
+
+  if (!authToken) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      authToken = authHeader.split(" ")[1];
+    }
+  }
 
   // send error response if there is no token
   if (!authToken) {
