@@ -156,8 +156,8 @@ export const exchangeToken = asyncHandler(async (req, res) => {
     const isDevModeOn = process.env.NODE_ENV === "development";
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true, // Always true for production
-      sameSite: "none", // Required for cross-domain
+      secure: !isDevModeOn,
+      sameSite: isDevModeOn ? "strict" : "none",
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
     });
 
