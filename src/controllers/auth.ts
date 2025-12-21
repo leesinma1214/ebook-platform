@@ -92,12 +92,19 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
     expiresIn: "15d",
   });
 
-  // Redirect with token in URL so frontend can exchange it for a cookie
+  // Set the cookie directly
+  const isDevModeOn = process.env.NODE_ENV === "development";
+  res.cookie("authToken", authToken, {
+    httpOnly: true,
+    secure: !isDevModeOn,
+    sameSite: isDevModeOn ? "strict" : "none",
+    expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+  });
+
+  // Redirect with profile info
   const redirectUrl = `${
     process.env.AUTH_SUCCESS_URL
-  }?token=${authToken}&profile=${encodeURIComponent(
-    JSON.stringify(formatUserProfile(user))
-  )}`;
+  }?profile=${encodeURIComponent(JSON.stringify(formatUserProfile(user)))}`;
 
   if (req.headers.accept?.includes("text/html")) {
     return res.send(`
@@ -121,8 +128,6 @@ export const verifyAuthToken = asyncHandler(async (req, res) => {
 
   res.json({
     message: "Verification successful",
-    redirectUrl,
-    token: authToken,
     profile: formatUserProfile(user),
   });
 });
