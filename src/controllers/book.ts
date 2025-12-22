@@ -486,35 +486,39 @@ export const getRecommendedBooks = asyncHandler(async (req, res) => {
 export const getFeaturedBooks = asyncHandler(async (req, res) => {
   const books = [
     {
-      title: "Murder on the Orient Express",
-      slogan: "Khám phá bí ẩn trên chuyến tàu Orient Express!",
-      subtitle: "Một hành trình ly kỳ qua những âm mưu và lừa dối.",
-      cover:
-        "https://playhouseonthesquare.org/assets/2991/10_murder_on_the_orient_express_square.png",
-      slug: "murder-on-the-orient-express-668f9ee73d175a420fa4de9a",
+      title: "Pride and Prejudice",
+      slogan: "Love, wit, and the danger of first impressions",
+      subtitle: "A Classic Novel of Manners, Marriage, and Moral Growth",
+      cover: "https://ebook-public-data-23f92d7.s3.ap-southeast-2.amazonaws.com/6948c74061275bfee15edbd9-pride-and-prejudice.png",
+      slug: "pride-and-prejudice-6948c74061275bfee15edbd9",
     },
     {
-      title: "To Kill a Mockingbird",
-      slogan: "Khám phá lòng dũng cảm trong thị trấn nhỏ.",
-      subtitle: "Một câu chuyện bất hủ về công lý và lòng trắc ẩn.",
-      cover:
-        "https://www.haydnsymons.com/wp-content/uploads/2013/07/book-cover-illustration.jpg",
-      slug: "to-kill-a-mockingbird-668f9ee73d175a420fa4de9d",
+      title: "Moby-Dick",
+      slogan: "An epic battle between man, nature, and obsession",
+      subtitle: "A Philosophical Sea Adventure of Fate and Obsession",
+      cover: "https://ebook-public-data-23f92d7.s3.ap-southeast-2.amazonaws.com/6948c80b61275bfee15edbf5-moby-dick.png",
+      slug: "moby-dick-6948c80b61275bfee15edbf5",
     },
     {
-      title: "The Girl with the Dragon Tattoo",
-      slogan: "Khám phá bí mật cùng cô gái và hình xăm rồng.",
-      subtitle: "Một câu chuyện trinh thám ly kỳ về bí ẩn và báo thù.",
-      cover: "https://m.media-amazon.com/images/I/51SdIh45zAL.jpg",
-      slug: "the-girl-with-the-dragon-tattoo-668f9ee73d175a420fa4debb",
+      title: "Frankenstein",
+      slogan: "The creation that became a curse",
+      subtitle: "The Modern Prometheus and the Cost of Forbidden Knowledge",
+      cover: "https://ebook-public-data-23f92d7.s3.ap-southeast-2.amazonaws.com/6948c9c861275bfee15edc12-frankenstein.png",
+      slug: "frankenstein-6948c9c861275bfee15edc12",
     },
     {
-      title: "The Hunger Games",
-      slogan: "Sống sót trong trò chơi, châm ngòi cuộc nổi dậy.",
-      subtitle: "Cuộc phiêu lưu hùng tráng về sự sống còn và kiên cường.",
-      cover:
-        "https://cdn11.bigcommerce.com/s-nfxi2m/images/stencil/500x659/products/663/1414/Hunger-Games-Book__38075.1692810297.jpg?c=2",
-      slug: "the-hunger-games-668f9ee73d175a420fa4debe",
+      title: "The King in Yellow",
+      slogan: "Once you read the second act, there is no return",
+      subtitle: "A Collection of Weird Tales of Madness and the Unseen",
+      cover: "https://ebook-public-data-23f92d7.s3.ap-southeast-2.amazonaws.com/6948cd7e61275bfee15edc4a-the-king-in-yellow.png",
+      slug: "the-king-in-yellow-6948cd7e61275bfee15edc4a",
+    },
+    {
+      title: "Romeo and Juliet",
+      slogan: "A love doomed by fate and family feud",
+      subtitle: "A Tragic Romance of Passion, Youth, and Destiny",
+      cover: "https://ebook-public-data-23f92d7.s3.ap-southeast-2.amazonaws.com/6947c447bce929619809bf20-romeo-and-juliet.png",
+      slug: "romeo-and-juliet-6947c447bce929619809bf20",
     },
   ];
 
